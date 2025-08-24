@@ -64,7 +64,7 @@ main :: IO ()
 main = do
     let initialWorld = World { board = glider, paused = False }
     play
-        (InWindow "Conway's Game of Life" (1024, 1024) (100, 100))
+        (InWindow "Conway's Game of Life" (1024, 1024) (-1, -1))
         black
         5
         initialWorld
