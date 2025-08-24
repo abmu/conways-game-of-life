@@ -1,6 +1,9 @@
+module Main where
+
 import qualified Data.Set as S
 import Data.Set (Set)
 import Graphics.Gloss
+import Graphics.Gloss.Interface.IO.Game
 
 type Cell = (Int, Int)
 type Board = Set Cell
@@ -35,3 +38,25 @@ cellToPicture (x, y) = translate (fromIntegral x * cellSize) (fromIntegral y * c
 
 boardToPicture :: Board -> Picture
 boardToPicture b = pictures $ map cellToPicture (S.toList b)
+
+-- Handle input
+handleEvent :: Event -> World -> World
+handleEvent (EventKey (Char 'p') Down _ _) w = w { paused = not (paused w) }
+handleEvent _ w = w
+
+-- Test patterns
+glider :: Board
+glider = S.fromList [(1,0),(2,1),(0,2),(1,2),(2,2)]
+
+-- Main
+main :: IO ()
+main = do
+    let initialWorld = World { board = glider, paused = False }
+    play
+        (InWindow "Conway's Game of Life" (600, 600) (100, 100))
+        black
+        0
+        initialWorld
+        (boardToPicture . board)
+        handleEvent
+        updateWorld
