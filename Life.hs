@@ -31,7 +31,7 @@ updateWorld _ w
 
 -- Convert board to gloss pictures
 cellSize :: Float
-cellSize = 10
+cellSize = 32
 
 cellToPicture :: Cell -> Picture
 cellToPicture (x, y) = translate (fromIntegral x * cellSize) (fromIntegral y * cellSize) $ color white $ rectangleSolid cellSize cellSize
@@ -39,9 +39,20 @@ cellToPicture (x, y) = translate (fromIntegral x * cellSize) (fromIntegral y * c
 boardToPicture :: Board -> Picture
 boardToPicture b = pictures $ map cellToPicture (S.toList b)
 
+-- Convert screen pos to cell pos on board
+screenToCell :: (Float, Float) -> Cell
+screenToCell (x, y) = (round (x / cellSize), round (y / cellSize))
+
+toggleCell :: Cell -> Board -> Board
+toggleCell c b
+    | S.member c b = S.delete c b
+    | otherwise = S.insert c b
+
 -- Handle input
 handleEvent :: Event -> World -> World
-handleEvent (EventKey (Char 'p') Down _ _) w = w { paused = not (paused w) }
+handleEvent (EventKey (SpecialKey KeySpace) Down _ _) w = w { paused = not (paused w) }
+handleEvent (EventKey (MouseButton LeftButton) Down _ pos) w
+    | paused w = w { board = toggleCell (screenToCell pos) (board w) }
 handleEvent _ w = w
 
 -- Test patterns
@@ -53,9 +64,9 @@ main :: IO ()
 main = do
     let initialWorld = World { board = glider, paused = False }
     play
-        (InWindow "Conway's Game of Life" (600, 600) (100, 100))
+        (InWindow "Conway's Game of Life" (1024, 1024) (100, 100))
         black
-        0
+        5
         initialWorld
         (boardToPicture . board)
         handleEvent
